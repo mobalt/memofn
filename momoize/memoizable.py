@@ -8,15 +8,6 @@ import time
 from pathlib import Path
 
 
-def hashable(item):
-    """Determine whether `item` can be hashed."""
-    try:
-        hash(item)
-    except TypeError:
-        return False
-    return True
-
-
 def is_deep_hashable(item):
     """Determine whether `item` can be hashed."""
     try:
@@ -24,10 +15,6 @@ def is_deep_hashable(item):
     except TypeError:
         return False
     return True
-
-
-def is_hashable(item):
-    return isinstance(item, Hashable)
 
 
 def is_iterable(item):
@@ -54,20 +41,6 @@ def tuplize(item):
         return tuple(sort(tuple(map(tuplize, item))))
     else:
         raise Exception("Can't make hashable: ", item)
-
-
-def sha256(filename):
-    """
-    Digest a file using sha256
-    """
-    sha256_hash = hashlib.sha256()
-    with open(filename, "rb") as f:
-        # Read and update hash string value in blocks of 4K
-        chunk = f.read(8192)
-        while len(chunk) > 0:
-            sha256_hash.update(chunk)
-            chunk = f.read(8192)
-    return sha256_hash.hexdigest()
 
 
 def __not_equal__(a, b):
