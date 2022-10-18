@@ -1,1 +1,1 @@
-from memoizable import Memoizable
+from .memoizable import Memoizable
