@@ -1,9 +1,11 @@
+import typing
 from collections.abc import Hashable, Iterable
 import copy
 import hashlib
 import os
 import pickle
 import time
+from pathlib import Path
 
 
 def hashable(item):
@@ -73,8 +75,13 @@ def __not_equal__(a, b):
 
 
 class Memoizable:
-    def __init__(self, cache_file=".cache", expire_in_days=7, hashfunc=None):
-        self.__cache_file__ = cache_file
+    def __init__(
+        self,
+        cache_file: typing.Union[str, Path] = ".cache",
+        expire_in_days=7,
+        hashfunc=None,
+    ):
+        self.__cache__file__ = Path(cache_file)
         self.cache = {}
         self.__expire_in__ = expire_in_days * 60 * 60 * 24
         if hashfunc is not None:
@@ -101,17 +108,15 @@ class Memoizable:
         return tuplize((*args, kwargs))
 
     def load_cache(self):
-        if os.path.exists(self.__cache_file__):
-            with open(self.__cache_file__, "rb") as fd:
-                self.cache = pickle.load(fd)
+        if self.__cache__file__.exists():
+            self.cache = pickle.loads(self.__cache__file__.read_bytes())
         else:
             self.cache = {}
 
-    def save_cache(self, cache_file=None):
-        if cache_file is None:
-            cache_file = self.__cache_file__
-        with open(cache_file, "wb") as f:
-            pickle.dump(self.cache, f)
+    def save_cache(self, cache_file: typing.Union[Path, None] = None):
+        if type(cache_file) is None:
+            cache_file = self.__cache__file__
+        cache_file.write_bytes(pickle.dumps(self.cache))
 
     def run(self, *args, **kwargs):
         raise NotImplementedError("Please override the run function.")
