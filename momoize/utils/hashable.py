@@ -56,7 +56,7 @@ def iterable_to_hashable(iterable):
     Returns:
         tuple: The hashable (sorted tuple)
     """
-    return sorted_tuple((make_hashable(item) for item in iterable))
+    return tuple((make_hashable(item) for item in iterable))
 
 
 def make_hashable(item: typing.Any) -> typing.Any:
