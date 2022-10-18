@@ -1,15 +1,19 @@
 import typing
-from collections.abc import Hashable, Iterable
+from collections.abc import Iterable
 import copy
-import hashlib
-import os
 import pickle
 import time
 from pathlib import Path
 
 
-def is_deep_hashable(item):
-    """Determine whether `item` can be hashed."""
+def is_hashable(item: typing.Any) -> bool:
+    """Try hashing the item. If it fails, it's not hashable.
+    Args:
+        item: The item to be hashed
+
+    Returns:
+        bool: True if the item can be hashed, False otherwise
+    """
     try:
         hash(item)
     except TypeError:
@@ -21,24 +25,27 @@ def is_iterable(item):
     return isinstance(item, Iterable)
 
 
-def is_dict(item):
-    return type(item) is dict
+def sorted_tuple(item: typing.Any) -> typing.Any:
+    """Try sorting the item. If it fails, return the item.
+    Args:
+        item: The item to be sorted
 
-
-def sort(item):
+    Returns:
+        item: The sorted item as a tuple, or the original item if it can't be sorted
+    """
     try:
-        return sorted(item)
+        return tuple(sorted(item))
     except TypeError:
         return item
 
 
-def tuplize(item):
-    if is_deep_hashable(item):
+def make_hashable(item):
+    if is_hashable(item):
         return item
-    elif is_dict(item):
-        return tuple(sort([(k, tuplize(v)) for k, v in item.items()]))
+    elif type(item) is dict:
+        return sorted_tuple([(k, make_hashable(v)) for k, v in item.items()])
     elif is_iterable(item):
-        return tuple(sort(tuple(map(tuplize, item))))
+        return sorted_tuple(tuple(map(make_hashable, item)))
     else:
         raise Exception("Can't make hashable: ", item)
 
@@ -78,7 +85,7 @@ class Memoizable:
             return copy.deepcopy(self.cache[hashedargs][0])
 
     def __preprocess_args__(self, *args, **kwargs):
-        return tuplize((*args, kwargs))
+        return make_hashable((*args, kwargs))
 
     def load_cache(self):
         if self.__cache__file__.exists():
