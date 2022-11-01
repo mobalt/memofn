@@ -18,12 +18,12 @@ class Foo:
     def __init__(self, x):
         self.x = x
 
-    def bar(self, y):
+    def add(self, y):
         self.x += y
         return self.x
 
     @memofn(ignore_first_n_args=0)
-    def mbar(self, y):
+    def memo_add(self, y):
         self.x += y
         return self.x
 
@@ -101,14 +101,17 @@ def test_memofn_namespaces_in_pytest():
 
 def test_memofn_with_classes():
     f = Foo(1)
-    g = Foo(1)
-    f.bar = memofn(f.bar)
-    assert f.bar(2) == 3
-    assert f.bar(2) == 3
-    assert f.mbar(2) == 5
-    assert f.mbar(2) == 7
+    # Overwrite add with memoized version
+    f.add = memofn(f.add)
+    assert f.add(2) == 3
+    assert f.add(2) == 3
+    assert f.memo_add(2) == 5
+    assert f.memo_add(2) == 7
 
-    assert g.bar(100) == 101
-    assert g.mbar(2) == 103
-    assert g.mbar(2) == 103
-    assert g.bar(2) == 7
+    g = Foo(1)
+    # Overwrite memo_add with memoized version that doesn't look at first arg
+    g.memo_add = memofn(g.memo_add)
+    assert g.add(100) == 101
+    assert g.memo_add(2) == 103
+    assert g.memo_add(2) == 103
+    assert g.add(2) == 105
