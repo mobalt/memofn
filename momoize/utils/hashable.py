@@ -69,7 +69,7 @@ def make_hashable(item: typing.Any) -> typing.Any:
         item: The hashable item
     """
     if is_hashable(item):
-        return item
+        return repr(item)
     elif type(item) is dict:
         return dict_to_hashable(item)
     elif is_iterable(item):
