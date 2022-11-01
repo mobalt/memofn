@@ -1,5 +1,7 @@
 import datetime
 import functools
+import os
+import pickle
 import types
 
 from momoize.utils.hashable import make_hashable
@@ -33,6 +35,7 @@ def namespace(fn):
 
 
 global_cache = {}
+global_cache_path = ".cache"
 
 
 def always_false(*args, **kwargs):
@@ -86,3 +89,55 @@ def memofn(
         return value
 
     return wrapper
+
+
+def load_cache(path: str = None):
+    """
+    Load the global cache from a pickle file.
+
+    Args:
+        path (str, optional): Path to the pickle file. Defaults to ".cache". Path is saved for later save_cache() calls.
+
+    Returns:
+        dict: The global cache
+    """
+
+    global global_cache, global_cache_path
+    if path is None:
+        path = global_cache_path
+    else:
+        global_cache_path = path
+
+    try:
+        with open(path, "rb") as f:
+            global_cache = pickle.load(f)
+    except FileNotFoundError:
+        global_cache = {}
+
+    return global_cache
+
+
+def save_cache(path: str = None):
+    """Save the global cache to a pickle file
+
+    Args:
+        path (str, optional): Path to the pickle file. Defaults to ".cache".
+
+    """
+    global global_cache, global_cache_path
+
+    if not global_cache:
+        global_cache = {}
+
+    if path is None:
+        path = global_cache_path
+
+    with open(path, "wb") as f:
+        pickle.dump(global_cache, f)
+
+
+def clear_cache():
+    """Clear the global cache and remove the cache file"""
+    global global_cache, global_cache_path
+    global_cache = {}
+    os.remove(global_cache_path)
