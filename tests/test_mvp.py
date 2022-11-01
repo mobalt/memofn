@@ -1,6 +1,6 @@
 import pytest
 
-from momoize.mvp import memofn
+from memofn.mvp import memofn
 
 
 def string_appender():

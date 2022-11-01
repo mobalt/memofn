@@ -4,7 +4,7 @@ import os
 import pickle
 import types
 
-from momoize.utils.hashable import make_hashable
+from memofn.utils.hashable import make_hashable
 
 
 class MemoValue:
